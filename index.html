@@ -106,6 +106,7 @@ footer{border-top:1px solid var(--line);padding:18px max(5vw,16px);color:var(--s
     <button class="lang" data-lang="es">Castellano</button>
     <button class="lang" data-lang="gl">Galego</button>
     <button class="lang" data-lang="ca">Català</button>
+    <button class="lang" id="install" data-t="install" hidden style="margin-left:auto"></button>
   </div>
   <h1 data-t="title"></h1>
   <p data-t="intro"></p>
@@ -202,6 +203,7 @@ es:{title:'Autoevaluación de proyectos interdisciplinares',intro:'Revisad junto
  listHelp:'Las evaluaciones se guardan solo en este navegador. Para pasar una a otra persona u otro ordenador, guárdala en archivo y que la abran con «Abrir archivo».',
  word:'Descargar informe (Word)',saved:'Archivo descargado.',declined:'Descarga cancelada.',dlErr:'No se pudo descargar. Prueba con «Copiar informe».',generating:'Preparando el documento…',
  opened:'Evaluación abierta.',badFile:'Ese archivo no es una evaluación de esta herramienta.',deleted:'Evaluación eliminada.',created:'Nueva evaluación creada.',
+ install:'Instalar como aplicación',
  w:{title:'Informe de autoevaluación del proyecto',fecha:'Fecha',resumen:'Resumen por bloques',bloque:'Bloque',media:'Media',val:'Valoración',detalle:'Detalle por bloques',aspecto:'Aspecto',mej:'Propuesta de mejora',obs:'Evidencias y observaciones'}},
 gl:{title:'Autoavaliación de proxectos interdisciplinares',intro:'Revisade xuntos os puntos clave do modelo ABP da Fundación Ana Mogas. Valorade cada aspecto coa técnica Si · Si, pero… · Non, pero… · Non. A diana e o informe actualízanse sós.',
  datos:'Datos do proxecto',etapa:'Etapa',st:{i:'Infantil',p:'Primaria',s:'Secundaria'},lTitulo:'Tópico / título do proxecto',lCurso:'Nivel e curso',lAreas:'Áreas ou materias implicadas',lCentro:'Centro',lQuien:'Quen avalía?',lMomento:'Momento',
@@ -217,6 +219,7 @@ gl:{title:'Autoavaliación de proxectos interdisciplinares',intro:'Revisade xunt
  listHelp:'As avaliacións gárdanse só neste navegador. Para pasarlle unha a outra persoa ou a outro ordenador, gárdaa nun arquivo e que a abran con «Abrir arquivo».',
  word:'Descargar informe (Word)',saved:'Arquivo descargado.',declined:'Descarga cancelada.',dlErr:'Non se puido descargar. Proba con «Copiar informe».',generating:'Preparando o documento…',
  opened:'Avaliación aberta.',badFile:'Ese arquivo non é unha avaliación desta ferramenta.',deleted:'Avaliación eliminada.',created:'Nova avaliación creada.',
+ install:'Instalar como aplicación',
  w:{title:'Informe de autoavaliación do proxecto',fecha:'Data',resumen:'Resumo por bloques',bloque:'Bloque',media:'Media',val:'Valoración',detalle:'Detalle por bloques',aspecto:'Aspecto',mej:'Proposta de mellora',obs:'Evidencias e observacións'}},
 ca:{title:'Autoavaluació de projectes interdisciplinaris',intro:"Reviseu junts els punts clau del model ABP de la Fundació Ana Mogas. Valoreu cada aspecte amb la tècnica Sí · Sí, però… · No, però… · No. La diana i l'informe s'actualitzen sols.",
  datos:'Dades del projecte',etapa:'Etapa',st:{i:'Infantil',p:'Primària',s:'Secundària'},lTitulo:'Tòpic / títol del projecte',lCurso:'Nivell i curs',lAreas:'Àrees o matèries implicades',lCentro:'Centre',lQuien:'Qui avalua?',lMomento:'Moment',
@@ -232,6 +235,7 @@ ca:{title:'Autoavaluació de projectes interdisciplinaris',intro:"Reviseu junts 
  listHelp:"Les avaluacions només es desen en aquest navegador. Per passar-ne una a una altra persona o a un altre ordinador, deseu-la en un fitxer i que l'obrin amb «Obrir un fitxer».",
  word:"Baixar l'informe (Word)",saved:'Fitxer baixat.',declined:'Baixada cancel·lada.',dlErr:"No s'ha pogut baixar. Prova amb «Copiar l'informe».",generating:'Preparant el document…',
  opened:'Avaluació oberta.',badFile:"Aquest fitxer no és una avaluació d'aquesta eina.",deleted:'Avaluació eliminada.',created:'Nova avaluació creada.',
+ install:"Instal·lar com a aplicació",
  w:{title:"Informe d'autoavaluació del projecte",fecha:'Data',resumen:'Resum per blocs',bloque:'Bloc',media:'Mitjana',val:'Valoració',detalle:'Detall per blocs',aspecto:'Aspecte',mej:'Proposta de millora',obs:'Evidències i observacions'}}};
 
 /* ---------- PREGUNTAS: [pregunta, propuesta de mejora, {i|p|s: pista por etapa}] ---------- */
@@ -620,6 +624,17 @@ const text=()=>{const L=t(),X=L.x,n=Object.keys(S.a).length,pct=pctNow();
 document.getElementById('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(text());toast(t().copied)}catch(e){toast(t().nocopy)}});
 const pr=document.getElementById('print');
 if(anchorOK){pr.hidden=false;pr.addEventListener('click',()=>{document.querySelectorAll('details.notes').forEach(d=>{if(d.querySelector('textarea').value)d.open=true});window.print()})}
+/* ---------- APLICACIÓN INSTALABLE (solo en la web publicada, p. ej. GitHub Pages) ---------- */
+if(anchorOK&&location.protocol==='https:'){
+ const add=(rel,href,extra)=>{const l=document.createElement('link');l.rel=rel;l.href=href;if(extra)Object.assign(l,extra);document.head.appendChild(l)};
+ add('manifest','manifest.webmanifest');add('apple-touch-icon','apple-touch-icon.png');add('icon','icon-192.png',{type:'image/png'});
+ [['theme-color','#0b7377'],['apple-mobile-web-app-capable','yes'],['mobile-web-app-capable','yes'],['apple-mobile-web-app-title','Autoevaluación ABP']].forEach(([n,c])=>{const m=document.createElement('meta');m.name=n;m.content=c;document.head.appendChild(m)});
+ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+ let deferred=null;const ib=document.getElementById('install');
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;ib.hidden=false});
+ ib.addEventListener('click',async()=>{if(!deferred)return;deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;ib.hidden=true});
+ window.addEventListener('appinstalled',()=>{ib.hidden=true});
+}
 renderStatic();update();
 }
 </script>
