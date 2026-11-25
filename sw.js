@@ -1,6 +1,6 @@
 /* Autoevaluación ABP · funciona sin conexión una vez abierta
    Isabel González Mosquera · CPR Plurilingüe Divina Pastora Ourense · Fundación Ana Mogas */
-const CACHE = 'autoeval-abp-v1';
+const CACHE = 'autoeval-abp-v2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const EXTRA = ['https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js'];
 
